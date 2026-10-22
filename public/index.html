@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AURA · Piedra, Papel o Tijera</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- Iconos: Font Awesome 6 (gratis) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>
+    <span class="marca"><i class="fa-solid fa-eye" aria-hidden="true"></i> AURA</span>
+    <small>Piedra, Papel o Tijera con visión artificial</small>
+  </h1>
+  <div class="top-acciones">
+    <span id="conexion" class="chip">Conectando…</span>
+    <button id="btnSonido" class="icono" title="Silenciar sonido" aria-label="Silenciar sonido">
+      <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+    </button>
+    <button id="btnVoz" class="icono" title="Activar comandos de voz («Hey Aura»)" aria-label="Comandos de voz" aria-pressed="false">
+      <i class="fa-solid fa-microphone-slash" aria-hidden="true"></i>
+    </button>
+  </div>
+</header>
+
+<div id="estadoVoz" class="estado-voz" hidden>
+  <i class="fa-solid fa-ear-listen" aria-hidden="true"></i>
+  <span id="textoVoz">Di «Hey Aura» para jugar</span>
+  <span id="oido" class="oido" aria-live="polite"></span>
+</div>
+
+<main>
+  <section class="arena">
+    <div class="jugador">
+      <h2 id="etiquetaJugador">Tú</h2>
+      <div class="cam">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="lienzoMano"></canvas>
+        <div id="cuenta" class="cuenta"></div>
+        <div id="enVivo" class="en-vivo">Cargando cámara…</div>
+      </div>
+    </div>
+
+    <div class="vs">VS</div>
+
+    <div class="jugador">
+      <h2>AURA</h2>
+      <div class="tarjeta-ia">
+        <div id="tiroIa" class="grande"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
+        <div id="textoIa" class="sub">Esperando…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Menú ---------- -->
+  <section id="menu" class="panel menu">
+    <h2>Nueva partida</h2>
+    <label class="campo">
+      <span>Tu nombre</span>
+      <input id="nombre" maxlength="30" autocomplete="nickname" placeholder="Para que AURA te recuerde">
+    </label>
+
+    <fieldset>
+      <legend>Dificultad</legend>
+      <div class="opciones">
+        <label><input type="radio" name="dificultad" value="facil"><span><b><i class="fa-solid fa-dice" aria-hidden="true"></i> Fácil</b><small>Tira al azar</small></span></label>
+        <label><input type="radio" name="dificultad" value="normal" checked><span><b><i class="fa-solid fa-brain" aria-hidden="true"></i> Normal</b><small>Aprende tus patrones</small></span></label>
+        <label><input type="radio" name="dificultad" value="dificil"><span><b><i class="fa-solid fa-users" aria-hidden="true"></i> Difícil</b><small>Tus patrones + los de todos</small></span></label>
+        <label><input type="radio" name="dificultad" value="imposible"><span><b><i class="fa-solid fa-user-secret" aria-hidden="true"></i> Imposible</b><small>Hace trampa</small></span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Modo</legend>
+      <div class="opciones">
+        <label><input type="radio" name="modo" value="libre" checked><span><b><i class="fa-solid fa-infinity" aria-hidden="true"></i> Libre</b><small>Juega las rondas que quieras</small></span></label>
+        <label><input type="radio" name="modo" value="mejor_de_3"><span><b><i class="fa-solid fa-medal" aria-hidden="true"></i> Mejor de 3</b><small>Gana quien llegue a 2</small></span></label>
+        <label><input type="radio" name="modo" value="mejor_de_5"><span><b><i class="fa-solid fa-trophy" aria-hidden="true"></i> Mejor de 5</b><small>Gana quien llegue a 3</small></span></label>
+      </div>
+    </fieldset>
+
+    <button id="btnEmpezar" class="principal" disabled><i class="fa-solid fa-play" aria-hidden="true"></i> Empezar</button>
+    <p class="nota"><i class="fa-solid fa-microphone" aria-hidden="true"></i> O di «Hey Aura» para empezar sin tocar nada.</p>
+    <p id="mensajeMenu" class="nota aviso"></p>
+  </section>
+
+  <!-- ---------- Partida ---------- -->
+  <section id="juego" class="juego" hidden>
+    <div class="barra-partida">
+      <span id="infoPartida"></span>
+      <div id="progreso" class="progreso"></div>
+      <button id="btnTerminar" class="secundario"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Terminar partida</button>
+    </div>
+    <p id="bienvenida" class="bienvenida"></p>
+    <div class="controles">
+      <button id="btnJugar" class="principal"><i class="fa-solid fa-hand-back-fist" aria-hidden="true"></i> Jugar ronda</button>
+      <div class="nota">Barra espaciadora o di «Hey Aura» · Saca tu tiro justo en el «¡Ya!»</div>
+      <p id="resultado" class="resultado"></p>
+      <p id="razon" class="razon"></p>
+      <p id="tardio" class="tardio"></p>
+    </div>
+  </section>
+
+  <!-- ---------- Paneles ---------- -->
+  <section class="paneles">
+    <div class="panel">
+      <h3><i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Marcador</h3>
+      <div class="marcador">
+        <div><b id="mJugador">0</b><small>Tú</small></div>
+        <div><b id="mEmpates">0</b><small>Empates</small></div>
+        <div><b id="mIa">0</b><small>AURA</small></div>
+      </div>
+      <p id="predicciones" class="nota centro">AURA aún no ha intentado predecir.</p>
+    </div>
+
+    <div class="panel">
+      <h3><i class="fa-solid fa-user" aria-hidden="true"></i> Tu perfil</h3>
+      <div id="perfil" class="perfil"><p class="nota">Juega unas rondas para ver cómo juegas.</p></div>
+    </div>
+
+    <div class="panel">
+      <h3><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Ranking <small class="nota">· Normal y Difícil, mín. 10 rondas</small></h3>
+      <div id="ranking"><p class="nota">Cargando…</p></div>
+    </div>
+
+    <div class="panel">
+      <h3><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Rondas de esta partida</h3>
+      <ol id="historial" class="historial" reversed></ol>
+    </div>
+  </section>
+</main>
+
+<!-- ---------- Fin de partida ---------- -->
+<div id="capa" class="capa" hidden>
+  <div class="capa-tarjeta" role="dialog" aria-modal="true" aria-labelledby="capaTitulo">
+    <div id="capaEmoji" class="grande"></div>
+    <h2 id="capaTitulo"></h2>
+    <p id="capaTexto"></p>
+    <div class="capa-botones">
+      <button id="btnRevancha" class="principal"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Revancha</button>
+      <button id="btnMenu" class="secundario"><i class="fa-solid fa-house" aria-hidden="true"></i> Menú</button>
+    </div>
+    <p class="nota"><i class="fa-solid fa-microphone" aria-hidden="true"></i> Di «Hey Aura» para la revancha</p>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
