@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "AURA: piedra, papel o tijera contra una IA que detecta tu mano con la cámara y responde a «Hey Aura». Backend en Node + Express + Supabase.",
   "type": "module",
-  "main": "server/index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "engines": {
     "node": ">=18"

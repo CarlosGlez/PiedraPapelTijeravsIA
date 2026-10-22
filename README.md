@@ -18,6 +18,16 @@
 
 Si el servidor arranca sin `.env`, el juego funciona igual en **modo local** (sin guardar nada). Así se puede probar la parte de la cámara antes de configurar Supabase.
 
+## Publicar en Vercel
+
+1. Sube el proyecto a GitHub (el `.gitignore` ya deja fuera `node_modules` y tus `.env`).
+2. En Vercel → *Add New → Project*, importa el repositorio. *Framework Preset* debe decir **Express** (Vercel lo detecta por el `server.js` de la raíz).
+3. En *Settings → Environment Variables* agrega `SUPABASE_URL` y `SUPABASE_SECRET_KEY`.
+4. **Vuelve a desplegar** (*Deployments → ⋯ → Redeploy*). Las variables solo aplican a despliegues nuevos.
+5. Abre `https://tu-proyecto.vercel.app/api/salud`: debe responder `{"ok":true,"db":"ok"}`.
+
+Cómo queda en Vercel: los archivos de `public/` se sirven desde su CDN y toda la app de Express (`/api/...`) corre como una sola función.
+
 ## Qué tiene
 
 | Función | Cómo funciona |
@@ -46,8 +56,9 @@ En pantalla se ve en qué se basó cada predicción y cuántas acertó.
 ## Estructura
 
 ```
+server.js         punto de entrada (Vercel lo detecta solo; en local abre el puerto)
 server/
-  index.js        arranque: lee .env y levanta el servidor
+  entorno.js      lee .env / variables de Vercel y conecta a Supabase
   app.js          rutas de la API, validación y manejo de errores
   db.js           todas las consultas a Supabase
 supabase/
